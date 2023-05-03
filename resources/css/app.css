@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+
+:root {
+    --primary-color: #ffd40d;
+    --dark: #000;
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+ul, ol {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+.user-navbar {
+    display: flex;
+    align-items: center; 
+    padding: 20px 50px; 
+    background: var(--primary-color); 
+}
+
+.user-navbar .logo a {
+    font-size: 25px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.user-navbar .nav-links {
+    padding-left: 50px;
+}
+
+.user-navbar .nav-links ul {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.user-navbar .nav-links ul a {
+    color: var(--dark);
+}
+
+.popup {
+    position: fixed;
+    height: 100vh;
+    z-index: 9999;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-head, .popup-body {
+    padding: 10px;
+    background: #FFF;
+}
+
+.popup-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.item-details .item-name {
+    font-size: 25px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 0px;
+}
+
+.item-details .item-quantity {
+    display: flex;
+    align-items: center;
+    max-width: 150px;
+    margin-bottom: 10px;
+}
+
+.item-description {
+    text-align: center;
+    color: #3a3a3a;
+}
+
+.popup-hidden {
+    transform: scale(1.1);
+    opacity: 0;
+}
+
+.popup-showed {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.popup-duration-300 {
+    transition: .3s;
+}
+
+@media (max-width: 767px) and (min-width: 576px) {
+    .popup-content {
+        width: 500px;
+    }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+    .popup-content {
+        width: 700px;
+    }
+}
+
+@media (min-width: 992px) {
+    .popup-content {
+        width: 700px;
+    }
+}
