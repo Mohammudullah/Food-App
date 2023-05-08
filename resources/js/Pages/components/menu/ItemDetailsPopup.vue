@@ -25,7 +25,7 @@ import { router } from '@inertiajs/vue3';
     }
     
     let addToCart = () => {
-        router.put('/cart', {
+        router.put('cart', {
             id: props.itemDetail.id, quantity:quantity.value,
         }, {
             replace: true,

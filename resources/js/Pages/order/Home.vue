@@ -2,12 +2,18 @@
   import EmptyLayout from '../../Shared/EmptyLayout.vue'; 
   import ItemDetailsPopup from '../components/menu/ItemDetailsPopup.vue'; 
   import { Swiper, SwiperSlide } from 'swiper/vue';
+  import { useMessages } from '../../Composables/useMessages';
   import 'swiper/css';
-import { router } from '@inertiajs/core';
+  import { router } from '@inertiajs/core';
 
   export default { 
     
     layout: EmptyLayout,
+
+    setup() {
+      let { showErrors, showMessage } = useMessages();
+      return {showErrors, showMessage}
+    },
 
     components: {
       Swiper,
@@ -18,13 +24,16 @@ import { router } from '@inertiajs/core';
     props: {
       images: Object,
       menus: Object,
-      cart: Object
+      cart: Object,
+      errors: Object,
+      flash: Object,
     },
 
     data() {
       return {
         showDetailPopup: false,
-        itemDetail: {}
+        itemDetail: {},
+        
       }
     },
 
@@ -44,7 +53,7 @@ import { router } from '@inertiajs/core';
       },
 
       checkout() {
-        router.post('/checkout');
+        router.get('/checkout');
       }
     },
   };
@@ -63,6 +72,8 @@ import { router } from '@inertiajs/core';
   <section class="mt-5">
     <div class="container">
       <div class="row">
+        <div class="col-12" v-html="showErrors(errors)"></div>
+        <div class="col-12" v-html=" showMessage(flash) "></div>
         <div class="col-lg-8">
 
           <template v-for="(menu, index) in menus" :key="menu.id">

@@ -5,6 +5,7 @@
 :root {
     --primary-color: #ffd40d;
     --dark: #000;
+    --danger: #f33;
 }
 
 * {
@@ -17,6 +18,15 @@ ul, ol {
 
 a {
     text-decoration: none !important;
+}
+
+.iti--show-flags {
+    width: 100%;
+}
+
+.form-input-error {
+    font-size: 13px;
+    color: var(--danger);
 }
 
 .user-navbar {

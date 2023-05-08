@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Menu;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use App\Models\Order;
+use Illuminate\Http\Request;
+use App\Enums\PaymentMethods;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rules\Enum;
+
+use function Termwind\render;
 
 class HomeController extends Controller
 {
@@ -100,7 +105,7 @@ class HomeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): void
     {
         //
     }
@@ -108,7 +113,7 @@ class HomeController extends Controller
     /**
      * Store user cart on the session
      */
-    public function cart(Request $request)
+    public function cart(Request $request): void
     {
         $quantity = $request->quantity ?? 1;
         $item = Item::findOrFail($request->id);
@@ -125,5 +130,102 @@ class HomeController extends Controller
 
         session()->put('cart', $cart);
 
+    }
+
+    /**
+     * got to checkout with added cart items
+     */
+    public function checkout(Request $request)
+    {
+        $cartInfo = $this->cartTotal(collect(session('cart', [])));
+
+        if($cartInfo['total'] <= 0) {
+            return redirect(route('index'))->withErrors([
+                'invalidCart' => 'Please add some item to cart for checkout',
+            ]);
+        }
+
+        return Inertia::render('order.TheCheckout', [
+            'cartInfo' => $cartInfo
+        ]);
+    }
+
+    /**
+     * Calculte cart toal
+     */
+    public function cartTotal(Collection $cart): array
+    {
+        $subTotal = $cart->map(function($item) {
+            return $item['price']*$item['quantity'];
+        })->sum();
+
+        $deliveryFee = percentageCalc($subTotal, 5);
+        $discount = percentageCalc($subTotal, 2);
+
+        $total = orderTotalCalc($subTotal, $discount, $deliveryFee);
+        $tax = taxCalc($total);
+
+        return [
+            'subTotal' =>  number_format($subTotal, 2),
+            'deliveryFee' => number_format($deliveryFee, 2),
+            'discount' => number_format($discount, 2),
+            'tax' => number_format($tax, 2),
+            'total' => number_format($total, 2),
+        ];
+    }
+
+    /**
+     * Finally place the order
+     */
+    protected function placeOrder(Request $request)
+    {
+        $checkoutInfo = $request->validate([
+            'name'              => ['required'],
+            'email'             => ['nullable', 'email:rfc,dns'],
+            'phone'             => ['required', 'phone'],
+            'payment_method'    => ['required', new Enum(PaymentMethods::class)],
+        ], [
+            'phone.phone' => 'Please enter a valid phone number'
+        ]);
+
+        return $this->storeOrder($checkoutInfo);
+        
+    }
+
+    /**
+     * store the order data
+     */
+    protected function storeOrder($checkoutInfo)
+    {
+        $cart = session('cart', []);
+        $cartTotal = $this->cartTotal(collect($cart));
+
+        if(empty($cart)) {
+            return redirect('/')->withErrors(['EmptyCart' => 'Your cart is empty try again with some items']);
+        }
+
+        try {
+            $order = new Order();
+            $order->items = json_encode($cart);
+            $order->sub_total = $cartTotal['subTotal'];
+            $order->discount = $cartTotal['discount'];
+            $order->delivery_fee = $cartTotal['deliveryFee'];
+            $order->tax_rate = 2;
+            $order->tax_included = 'Yes';
+            $order->customer_name = $checkoutInfo['name'];
+            $order->customer_email = $checkoutInfo['email'];
+            $order->customer_phone = $checkoutInfo['phone'];
+            $order->payment_method = $checkoutInfo['payment_method'];
+            $order->paid = $checkoutInfo['payment_method'] == PaymentMethods::Online ? 'Yes' : 'No';
+            $order->delivery_address = null;
+            $order->save();
+        } catch (\Throwable $th) {
+            return redirect('/checkout')->withErrors(['orderFaild' => 'Your order faild due to internal error']);
+        }
+
+        session()->remove('cart');
+        return redirect('/')->with('message', ['message' => 'Order created successfully', 'type' => 'success']);
+        
+        
     }
 }

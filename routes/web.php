@@ -23,7 +23,7 @@ use Carbon\Carbon;
 */
 
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Route::resources([
     'users' => UserController::class,
@@ -37,5 +37,7 @@ Route::post('/menus/{id}/change-status', [MenuController::class, 'change_status'
 
 //cart
 Route::put('/cart', [HomeController::class, 'cart']);
+Route::get('/checkout', [HomeController::class, 'checkout']);
+Route::post('/place-order', [HomeController::class, 'placeOrder']);
 
 
